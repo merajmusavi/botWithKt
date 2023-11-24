@@ -34,8 +34,8 @@ class DaoImp : Dao {
     override fun insertUser(entites: List<Entity>): Boolean {
         DriverManager.getConnection(HOST,USER,PASSWORD).use { connection ->
             val insertUserToDataBase = connection.prepareStatement("INSERT IGNORE INTO data(name, username) VALUES(?, ?)")
-            insertUserToDataBase.setString(0,entites[0].name)
-            insertUserToDataBase.setString(1,entites[0].username)
+            insertUserToDataBase.setString(1,entites[0].name)
+            insertUserToDataBase.setString(2,entites[0].username)
 
             val executeUpdate = insertUserToDataBase.executeUpdate()
             if (executeUpdate == 0){
@@ -64,9 +64,39 @@ class DaoImp : Dao {
     }
 
     override fun changestatus(username: String, status: Int): Boolean {
+        DriverManager.getConnection(HOST,USER,PASSWORD).use { connection ->
+            val update = "UPDATE data set status = ? WHERE username = ?"
+            val prepareStatement = connection.prepareStatement(update)
+            prepareStatement.setInt(1,status)
+            prepareStatement.setInt(2,status)
+
+
+
+            var executeUpdate = prepareStatement.executeUpdate()
+
+            if (executeUpdate>0){
+                return true
+            }
+        }
+        return false
     }
 
     override fun selectSpecificUser(username: String): Int {
+        var status = 0
+        DriverManager.getConnection(HOST,USER,PASSWORD).use { connection ->
+            val select = "SELECT * FROM data WHERE username = ?"
+            val prepareStatement = connection.prepareStatement(select)
+            prepareStatement.setString(1,username)
+
+            val executeQuery = prepareStatement.executeQuery()
+
+            while (executeQuery.next()){
+
+               status = executeQuery.getInt("status")
+            }
+
+        }
+        return status
     }
 
 
